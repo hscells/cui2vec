@@ -12,8 +12,8 @@ import (
 	"fmt"
 )
 
-// Vector is a complete cui2vec file loaded into memory.
-type Vector map[string][]float64
+// Embeddings is a complete cui2vec file loaded into memory.
+type Embeddings map[string][]float64
 
 // Concept is a CUI that has a similarity score in relation to a target CUI.
 type Concept struct {
@@ -27,7 +27,7 @@ type Concept struct {
 // which was downloaded from:
 //	https://figshare.com/s/00d69861786cd0156d81
 // is a csv file. The skipFirst parameter determines if the first line of the file should be skipped.
-func Load(r io.Reader, skipFirst bool) (Vector, error) {
+func Load(r io.Reader, skipFirst bool) (Embeddings, error) {
 	scanner := bufio.NewScanner(r)
 	if skipFirst {
 		scanner.Scan()
@@ -37,7 +37,7 @@ func Load(r io.Reader, skipFirst bool) (Vector, error) {
 	var mu sync.Mutex
 	queue := make(chan string)
 	complete := make(chan bool)
-	vector := make(Vector)
+	vector := make(Embeddings)
 
 	// Read the pre-trained vector file line by line.
 	go func() {
@@ -84,7 +84,7 @@ func Load(r io.Reader, skipFirst bool) (Vector, error) {
 
 // Similar computes cuis that a similar to an input CUI. The distance function used is cosine similarity. The CUIs are
 // then run through softmax and sorted.
-func (v Vector) Similar(cui string) ([]Concept, error) {
+func (v Embeddings) Similar(cui string) ([]Concept, error) {
 	vec := v[cui]
 	cuis := make([]Concept, len(v)-1)
 	i := 0
