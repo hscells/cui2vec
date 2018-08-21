@@ -14,7 +14,7 @@ func TestName(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	v, err := Load(f, true)
+	v, err := LoadModel(f, true)
 	if err != nil {
 		t.Fatal(err)
 	}

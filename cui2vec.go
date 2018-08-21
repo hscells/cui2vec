@@ -21,13 +21,13 @@ type Concept struct {
 	Value float64
 }
 
-// Load a cui2vec pre-trained model into memory.
+// LoadModel a cui2vec pre-trained model into memory.
 // The pre-trained file from:
 // 	https://arxiv.org/pdf/1804.01486.pdf
 // which was downloaded from:
 //	https://figshare.com/s/00d69861786cd0156d81
 // is a csv file. The skipFirst parameter determines if the first line of the file should be skipped.
-func Load(r io.Reader, skipFirst bool) (Embeddings, error) {
+func LoadModel(r io.Reader, skipFirst bool) (Embeddings, error) {
 	scanner := bufio.NewScanner(r)
 	if skipFirst {
 		scanner.Scan()
@@ -86,7 +86,7 @@ func Load(r io.Reader, skipFirst bool) (Embeddings, error) {
 // then run through softmax and sorted.
 func (v Embeddings) Similar(cui string) ([]Concept, error) {
 	vec := v[cui]
-	cuis := make([]Concept, len(v)-1)
+	var cuis []Concept
 	i := 0
 
 	concurrency := runtime.NumCPU() * 2
@@ -104,11 +104,15 @@ func (v Embeddings) Similar(cui string) ([]Concept, error) {
 					return
 				}
 
+				if len(c) == 0 {
+					return
+				}
+
 				mu.Lock()
-				cuis[i] = Concept{
+				cuis = append(cuis, Concept{
 					CUI:   c,
 					Value: sim,
-				}
+				})
 				i++
 				mu.Unlock()
 			}
