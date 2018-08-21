@@ -1,3 +1,4 @@
+// package cui2vec implements utilities for dealing with cui2vec embeddings and mapping cuis to text.
 package cui2vec
 
 import (
