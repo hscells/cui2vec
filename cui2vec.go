@@ -11,6 +11,8 @@ import (
 	"sync"
 	"runtime"
 	"fmt"
+	"regexp"
+	"github.com/go-errors/errors"
 )
 
 // Embeddings is a complete cui2vec file loaded into memory.
@@ -134,4 +136,27 @@ func (v Embeddings) Similar(cui string) ([]Concept, error) {
 	})
 
 	return cuis, nil
+}
+
+// CUI2Int converts a string CUI into an integer.
+func CUI2Int(cui string) (int, error) {
+	re, _ := regexp.Compile("C[0]+(?P<CUI>[0-9]+)")
+	m := re.FindAllStringSubmatch(cui, -1)
+	if len(m) != 1 {
+		return 0, errors.New(fmt.Sprintf("%s is not a cui", cui))
+	}
+	v, err := strconv.Atoi(m[0][1])
+	if err != nil {
+		return 0, err
+	}
+	return v, nil
+}
+
+// Int2CUI converts an integer value to a CUI.
+func Int2CUI(val int) string {
+	cui := strconv.Itoa(val)
+	for len(cui) < 7 {
+		cui = "0" + cui
+	}
+	return "C" + cui
 }
