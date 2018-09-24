@@ -1,12 +1,12 @@
 package cui2vec
 
 import (
-	"math"
 	"gonum.org/v1/gonum/floats"
+	"math"
 )
 
-// softmax normalises a slice of concepts.
-func softmax(z []Concept) []Concept {
+// Softmax normalises a slice of concepts.
+func Softmax(z []Concept) []Concept {
 	zExp := make([]float64, len(z))
 	for i := range z {
 		zExp[i] = math.Exp(z[i].Value)

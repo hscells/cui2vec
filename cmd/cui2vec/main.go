@@ -1,24 +1,26 @@
 package main
 
 import (
-	"github.com/alexflint/go-arg"
+	"encoding/json"
 	"fmt"
+	"github.com/alexflint/go-arg"
+	"github.com/go-errors/errors"
 	"github.com/hscells/cui2vec"
 	"os"
-	"encoding/json"
 )
 
 type args struct {
-	CUI       string `arg:"help:input cui,required"`
-	Model     string `arg:"help:path to cui2vec model"`
-	SkipFirst bool   `arg:"help:skip first line in cui2vec model?"`
-	N         int    `arg:"help:number of cuis to output"`
-	Mapping   string `arg:"help:path to cui mapping"`
-	V         bool   `arg:"help:verbose output"`
+	CUI       string `help:"input cui,required"`
+	Model     string `help:"path to cui2vec model"`
+	Type      string `help:"what kind of cui2vec model is loaded (default/precomputed)"`
+	SkipFirst bool   `help:"skip first line in cui2vec model?"`
+	NumCUIS   int    `arg:"-n" help:"number of cuis to output"`
+	Mapping   string `help:"path to cui mapping"`
+	Verbose   bool   `arg:"-v" help:"verbose output"`
 }
 
 func (args) Version() string {
-	return "cui2vec 21.Aug.2018"
+	return "cui2vec 24.Sep.2018"
 }
 
 func (args) Description() string {
@@ -34,7 +36,7 @@ func main() {
 	arg.MustParse(&args)
 
 	if len(args.Model) > 0 {
-		if args.V {
+		if args.Verbose {
 			fmt.Println("loading model...")
 		}
 
@@ -42,12 +44,23 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		e, err := cui2vec.LoadModel(f, args.SkipFirst)
-		if err != nil {
-			panic(err)
+
+		var e cui2vec.Embeddings
+		if args.Type == "default" {
+			e, err = cui2vec.NewUncompressedEmbeddings(f, args.SkipFirst)
+			if err != nil {
+				panic(err)
+			}
+		} else if args.Type == "precomputed" {
+			e, err = cui2vec.NewPrecomputedEmbeddings(f)
+			if err != nil {
+				panic(err)
+			}
+		} else {
+			panic(errors.New("unrecognised model type"))
 		}
 
-		if args.V {
+		if args.Verbose {
 			fmt.Println("computing similarity...")
 		}
 		concepts, err := e.Similar(args.CUI)
@@ -55,14 +68,14 @@ func main() {
 			panic(err)
 		}
 
-		if args.N > 0 {
+		if args.NumCUIS > 0 {
 			// Resize the slice.
-			if args.V {
+			if args.Verbose {
 				fmt.Println("resizing slice...")
 			}
 
-			if len(concepts) > args.N {
-				concepts = concepts[:args.N]
+			if len(concepts) > args.NumCUIS {
+				concepts = concepts[:args.NumCUIS]
 			}
 		}
 
@@ -79,7 +92,7 @@ func main() {
 	}
 
 	if len(args.Mapping) > 0 {
-		if args.V {
+		if args.Verbose {
 			fmt.Println("loading mapping...")
 		}
 		m, err := cui2vec.LoadCUIMapping(args.Mapping)

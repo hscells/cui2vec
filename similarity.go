@@ -39,8 +39,8 @@ func norm(x []float64, pow float64) float64 {
 	return math.Pow(s, 1/pow)
 }
 
-// cosine returns the cosine similarity between two vectors.
-func cosine(x, y []float64) (float64, error) {
+// Cosine returns the cosine similarity between two vectors.
+func Cosine(x, y []float64) (float64, error) {
 	d, err := dotProduct(x, y)
 	if err != nil {
 		return 0, err
