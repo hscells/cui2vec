@@ -1,31 +1,46 @@
-package cui2vec
+package cui2vec_test
 
 import (
-	"testing"
-	"os"
-	"log"
 	"fmt"
+	"github.com/hscells/cui2vec"
+	"os"
+	"testing"
 )
 
-func TestName(t *testing.T) {
-	log.Println("loading file")
-	f, err := os.Open("cui2vec_pretrained.csv")
+func TestUncompressed(t *testing.T) {
+	f, err := os.Open("cui2vec_pretrained_medium.csv")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	v, err := LoadModel(f, true)
+	v, err := cui2vec.NewUncompressedEmbeddings(f, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Println("loaded file")
 
-	log.Println("computing distance")
 	s, err := v.Similar("C0000052")
 	if err != nil {
 		t.Fatal(err)
 	}
 	fmt.Println(s[:5])
-	log.Println("computed distance")
+	return
+}
+
+func TestPrecomputed(t *testing.T) {
+	f, err := os.Open("cui2vec_precomputed_medium.bin")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v, err := cui2vec.NewPrecomputedEmbeddings(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s, err := v.Similar("C0000052")
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(s[:5])
 	return
 }

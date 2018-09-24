@@ -2,7 +2,6 @@ package cui2vec
 
 import (
 	"encoding/binary"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"math"
@@ -12,12 +11,16 @@ import (
 // It contains a sparse Matrix where the rows are CUIs and the columns are the distances to other CUIs.
 // Each row is formatted in the form [CUI, score, CUI, score, ...].
 // Each CUI must be converted back to a string, and each score must be re-normalised from an int back to a float (taken care of by the Similar method).
-// The file format of the
 type PrecomputedEmbeddings struct {
 	Matrix [][]int
 	Cols   int
 }
 
+// LoadModel reads a model from disk into memory. The file format of the pre-computed distances
+// file is that of a single, continuous byte sequence starting with four bytes indicating the rows in the matrix.
+// The first four bytes indicate a single Uint32 number representing the size of the matrix.
+// This is used to create a fixed-size sparse matrix. The `Cols` attribute of the `PrecomputedEmbeddings` type
+// is used to read N four-byte Uint32 numbers at a time to populate the columns of the matrix.
 func (v *PrecomputedEmbeddings) LoadModel(r io.Reader) error {
 	var (
 		matrix [][]int
@@ -51,6 +54,13 @@ func (v *PrecomputedEmbeddings) LoadModel(r io.Reader) error {
 	return nil
 }
 
+// WriteModel writes a pre-computed distance matrix to disk.
+// The write begins with a four-byte sequence to be parsed as a Uint32 representing the
+// size of the matrix. Each value of the matrix is then written one by one in a continuous
+// byte sequence, where each element in the matrix is encoded as a four-byte sequence to
+// be parsed as a Uint32. Elements of the matrix are written row-by-row, and each row
+// is exactly `Cols` wide. If there are less than `Cols` elements in a row, the row is
+// padded with zeros.
 func (v *PrecomputedEmbeddings) WriteModel(w io.Writer) error {
 	d := make([]byte, 4)
 	binary.LittleEndian.PutUint32(d, uint32(len(v.Matrix)))
@@ -90,6 +100,9 @@ func (v *PrecomputedEmbeddings) WriteModel(w io.Writer) error {
 	return nil
 }
 
+// Similar matches a given input CUI to the `Cols`-closest CUIs in the cui2vec embedding space.
+// As each row in the matrix is encoded into (CUI, score) pairs, this method handles that.
+// It also converts each int value in the matrix into either a string CUI or a re-normalised softmax score float64.
 func (v *PrecomputedEmbeddings) Similar(cui string) ([]Concept, error) {
 	c, err := CUI2Int(cui)
 	if err != nil {
@@ -116,7 +129,6 @@ func (v *PrecomputedEmbeddings) Similar(cui string) ([]Concept, error) {
 				CUI:   concept,
 				Value: score,
 			}
-			fmt.Println(c)
 			concepts[j] = c
 			j++
 		} else {
