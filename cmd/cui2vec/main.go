@@ -20,7 +20,7 @@ type args struct {
 }
 
 func (args) Version() string {
-	return "cui2vec 24.Sep.2018"
+	return "cui2vec 02.Oct.2018"
 }
 
 func (args) Description() string {

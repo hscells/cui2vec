@@ -21,9 +21,10 @@ type Concept struct {
 	Value float64
 }
 
+var re, _ = regexp.Compile("C[0]*(?P<CUI>[0-9]+)")
+
 // CUI2Int converts a string CUI into an integer.
 func CUI2Int(cui string) (int, error) {
-	re, _ := regexp.Compile("C[0]*(?P<CUI>[0-9]+)")
 	m := re.FindAllStringSubmatch(cui, -1)
 	if len(m) != 1 {
 		return 0, errors.New(fmt.Sprintf("%s is not a cui", cui))
