@@ -115,8 +115,13 @@ func (v *PrecomputedEmbeddings) Similar(cui string) ([]Concept, error) {
 		concepts []Concept
 	)
 
+	// Exit early if the CUI is malformed.
+	if c >= len(v.Matrix) || c < 0 {
+		return concepts, nil
+	}
+
 	// Create a slice of concepts from the number of pre-computed scores.
-	concepts = make([]Concept, len(v.Matrix[c])/2)
+	concepts = make([]Concept, v.Cols/2)
 	j := 0
 	for i, val := range v.Matrix[c] {
 		if i%2 != 0 {
