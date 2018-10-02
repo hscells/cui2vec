@@ -10,7 +10,9 @@ Example: See [cmd/cui2vec/main.go](cmd/cui2vec/main.go)
 
 ## Data
 
-Pretrained embeddings (model) can be downloaded from https://figshare.com/s/00d69861786cd0156d81.
+Pre-trained embeddings (model) can be downloaded from https://figshare.com/s/00d69861786cd0156d81.
+
+A pre-computed distances version of these pre-trained embeddings is included in the [testdata](testdata) folder. 
 
 ---
 
@@ -45,17 +47,38 @@ Command-line utility can be installed with:
 go install github.com/hscells/cui2vec/cmd/cui2vec
 ```
 
-```go
-Usage: cui2vec --cui CUI [--model MODEL] [--skipfirst] [--n N] [--mapping MAPPING] [--v]
+```bash
+Usage: cui2vec [--cui CUI] [--model MODEL] [--type TYPE] [--skipfirst] [--numcuis NUMCUIS] [--mapping MAPPING] [--verbose]
 
 Options:
-  --cui CUI              input cui
-  --model MODEL          path to cui2vec model
-  --skipfirst            skip first line in cui2vec model?
-  --n N                  number of cuis to output
-  --mapping MAPPING      path to cui mapping
-  --v                    verbose output
+  --cui CUI
+  --model MODEL
+  --type TYPE
+  --skipfirst
+  --numcuis NUMCUIS, -n NUMCUIS
+  --mapping MAPPING
+  --verbose, -v
   --help, -h             display this help and exit
   --version              display version and exit
 ```
 
+### Pre-computing distances
+
+A tool that can be used to compress and increase the speed of computing similar CUIs is included in the form of `pcdvec`.
+
+Install the tool with 
+
+```bash
+go get github.com/hscells/cui2vec/cmd/pcdvec
+```
+
+```bash
+Usage: pcdvec --cui CUI [--output OUTPUT] [--skipfirst]
+
+Options:
+  --cui CUI
+  --output OUTPUT, -o OUTPUT
+  --skipfirst
+  --help, -h             display this help and exit
+  --version              display version and exit
+```

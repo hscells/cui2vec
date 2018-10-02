@@ -12,5 +12,4 @@ func TestMapping(t *testing.T) {
 	}
 
 	fmt.Println(m["C0000294"])
-
 }
