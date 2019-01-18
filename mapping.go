@@ -11,6 +11,8 @@ import (
 
 type Mapping map[string]string
 
+type AliasMapping map[string][]string
+
 type frequency struct {
 	cui       string
 	term      string
@@ -99,6 +101,35 @@ func LoadCUIFrequencyMapping(path string) (Mapping, error) {
 		if _, ok := mapping[f.cui]; !ok {
 			mapping[f.cui] = f.term
 		}
+	}
+
+	return mapping, nil
+}
+
+func LoadCUIAliasMapping(path string) (AliasMapping, error) {
+	f, err := os.OpenFile(path, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	r := csv.NewReader(f)
+	records, err := r.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	mapping := make(AliasMapping)
+	for _, record := range records {
+		if len(record) < 3 {
+			continue
+		}
+		cui, term := record[0], record[1]
+
+		for len(cui) < 7 {
+			cui = "0" + cui
+		}
+		cui = "C" + cui
+
+		mapping[cui] = append(mapping[cui], term)
 	}
 
 	return mapping, nil
