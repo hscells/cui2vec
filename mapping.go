@@ -2,10 +2,20 @@ package cui2vec
 
 import (
 	"encoding/csv"
+	"fmt"
 	"os"
+	"sort"
+	"strconv"
+	"strings"
 )
 
 type Mapping map[string]string
+
+type frequency struct {
+	cui       string
+	term      string
+	frequency int
+}
 
 // LoadCUIMapping loads a mapping of cui to most common title.
 //
@@ -34,11 +44,70 @@ func LoadCUIMapping(path string) (Mapping, error) {
 		cui, title := record[0], record[1]
 
 		for len(cui) < 7 {
-			cui = "0"+cui
+			cui = "0" + cui
 		}
 		cui = "C" + cui
 
 		mapping[cui] = title
 	}
 	return mapping, nil
+}
+
+func LoadCUIFrequencyMapping(path string) (Mapping, error) {
+	f, err := os.OpenFile(path, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	r := csv.NewReader(f)
+	records, err := r.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	frequencies := make([]frequency, len(records))
+	for i, record := range records {
+		if len(record) < 3 {
+			continue
+		}
+		cui, title, f := record[0], record[1], record[3]
+
+		freq, err := strconv.Atoi(strings.Replace(f, `"`, "", -1))
+		if err != nil {
+			return nil, err
+		}
+
+		for len(cui) < 7 {
+			cui = "0" + cui
+		}
+		cui = "C" + cui
+
+		frequencies[i] = frequency{
+			cui:       cui,
+			term:      title,
+			frequency: freq,
+		}
+	}
+
+	sort.Slice(frequencies, func(i, j int) bool {
+		return frequencies[i].frequency > frequencies[j].frequency
+	})
+
+	fmt.Println(frequencies[0:10])
+
+	mapping := make(Mapping)
+	for _, f := range frequencies {
+		if _, ok := mapping[f.cui]; !ok {
+			mapping[f.cui] = f.term
+		}
+	}
+
+	return mapping, nil
+}
+
+func (m Mapping) Invert() Mapping {
+	i := make(Mapping)
+	for k, v := range m {
+		i[v] = k
+	}
+	return i
 }
