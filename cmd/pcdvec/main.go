@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/alexflint/go-arg"
 	"github.com/hscells/cui2vec"
+	"gopkg.in/cheggaaa/pb.v1"
 	"io"
 	"math"
 	"os"
@@ -18,11 +19,12 @@ const (
 type args struct {
 	CUI       string `arg:"required" help:"path to cui2vec model"`
 	Output    string `arg:"-o" help:"where to output distances to (default stdout)"`
+	Concepts  int    `arg:"-n" help:"how many concepts to take (default 20)"`
 	SkipFirst bool   `help:"skip first line in cui2vec model?"`
 }
 
 func (args) Version() string {
-	return "pcdvec 24.Sep.2018"
+	return "pcdvec 8.May.2018"
 }
 
 func (args) Description() string {
@@ -33,7 +35,7 @@ func round(num float64) int {
 	return int(num + math.Copysign(0.5, num))
 }
 
-func distance(embeddings map[string][]float64) ([][]int, error) {
+func distance(embeddings map[string][]float64, n int) ([][]int, error) {
 	defer fmt.Println()
 	fmt.Println("computing distances")
 	var (
@@ -57,9 +59,11 @@ func distance(embeddings map[string][]float64) ([][]int, error) {
 	// Now, create a sparse matrix of size `max`.
 	matrix = make([][]int, max+1)
 
+	count := len(embeddings)
+	bar := pb.StartNew(count)
+
 	// Next, compute the distances between each cui and every other cui.
 	for c1, e1 := range embeddings {
-		fmt.Print(".")
 		// Minus one because we don't include this cui.
 		concepts := make([]cui2vec.Concept, len(embeddings)-1)
 		i := 0
@@ -100,7 +104,6 @@ func distance(embeddings map[string][]float64) ([][]int, error) {
 		})
 
 		// Take the top n concepts (in this case n=20; hardcoded).
-		n := 20
 		if len(concepts) < n {
 			n = len(concepts)
 		}
@@ -129,6 +132,7 @@ func distance(embeddings map[string][]float64) ([][]int, error) {
 			matrix[c][j+1] = v
 			j += 2
 		}
+		bar.Increment()
 	}
 	return matrix, nil
 }
@@ -139,8 +143,13 @@ func main() {
 		err    error
 		input  io.ReadCloser
 		output io.WriteCloser
+		n      int
 	)
 	arg.MustParse(&args)
+
+	if args.Concepts <= 0 {
+		n = 20
+	}
 
 	// Open the output file, defaulting to stdout.
 	if len(args.Output) == 0 {
@@ -167,7 +176,7 @@ func main() {
 	}
 
 	// Create a new pre-computed embeddings with distance calculations.
-	m, err := distance(ue.Embeddings)
+	m, err := distance(ue.Embeddings, n)
 	if err != nil {
 		panic(err)
 	}

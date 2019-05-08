@@ -2,7 +2,6 @@ package cui2vec
 
 import (
 	"encoding/csv"
-	"fmt"
 	"os"
 	"sort"
 	"strconv"
@@ -61,6 +60,7 @@ func LoadCUIFrequencyMapping(path string) (Mapping, error) {
 		return nil, err
 	}
 	r := csv.NewReader(f)
+	r.Comma = ';'
 	records, err := r.ReadAll()
 	if err != nil {
 		return nil, err
@@ -68,11 +68,16 @@ func LoadCUIFrequencyMapping(path string) (Mapping, error) {
 
 	frequencies := make([]frequency, len(records))
 	for i, record := range records {
+		if i == 0 {
+			continue
+		}
 		if len(record) < 3 {
 			continue
 		}
-		cui, title, f := record[0], record[1], record[3]
+		cui, title, f := record[0], record[1], record[2]
 
+		cui = strings.Replace(cui, `"`, "", -1)
+		title = strings.Replace(title, `"`, "", -1)
 		freq, err := strconv.Atoi(strings.Replace(f, `"`, "", -1))
 		if err != nil {
 			return nil, err
@@ -94,8 +99,6 @@ func LoadCUIFrequencyMapping(path string) (Mapping, error) {
 		return frequencies[i].frequency > frequencies[j].frequency
 	})
 
-	fmt.Println(frequencies[0:10])
-
 	mapping := make(Mapping)
 	for _, f := range frequencies {
 		if _, ok := mapping[f.cui]; !ok {
@@ -112,18 +115,23 @@ func LoadCUIAliasMapping(path string) (AliasMapping, error) {
 		return nil, err
 	}
 	r := csv.NewReader(f)
+	r.Comma = ';'
 	records, err := r.ReadAll()
 	if err != nil {
 		return nil, err
 	}
 
 	mapping := make(AliasMapping)
-	for _, record := range records {
+	for i, record := range records {
+		if i == 0 {
+			continue
+		}
 		if len(record) < 3 {
 			continue
 		}
 		cui, term := record[0], record[1]
-
+		cui = strings.Replace(cui, `"`, "", -1)
+		term = strings.Replace(term, `"`, "", -1)
 		for len(cui) < 7 {
 			cui = "0" + cui
 		}
