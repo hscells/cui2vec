@@ -14,6 +14,7 @@ import (
 
 type UncompressedEmbeddings struct {
 	SkipFirst  bool
+	Comma      rune
 	Embeddings map[string][]float64
 }
 
@@ -47,7 +48,9 @@ func (v *UncompressedEmbeddings) LoadModel(r io.Reader) error {
 		go func(q chan string, complete chan bool) {
 			for b := range q {
 				// Use a csv parser to read the line.
-				line, err := csv.NewReader(bytes.NewBufferString(b)).Read()
+				reader := csv.NewReader(bytes.NewBufferString(b))
+				reader.Comma = v.Comma
+				line, err := reader.Read()
 				if err != nil {
 					panic(err)
 				}

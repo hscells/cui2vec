@@ -45,11 +45,12 @@ func Int2CUI(val int) string {
 	return "C" + cui
 }
 
-func NewUncompressedEmbeddings(r io.Reader, skipFirst bool) (*UncompressedEmbeddings, error) {
+func NewUncompressedEmbeddings(r io.Reader, skipFirst bool, comma rune) (*UncompressedEmbeddings, error) {
 	v := &UncompressedEmbeddings{
 		SkipFirst:  skipFirst,
 		Embeddings: make(map[string][]float64),
 	}
+	v.Comma = comma
 	err := v.LoadModel(r)
 	return v, err
 }
