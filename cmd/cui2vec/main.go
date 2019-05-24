@@ -47,7 +47,7 @@ func main() {
 
 		var e cui2vec.Embeddings
 		if args.Type == "default" {
-			e, err = cui2vec.NewUncompressedEmbeddings(f, args.SkipFirst)
+			e, err = cui2vec.NewUncompressedEmbeddings(f, args.SkipFirst, ',')
 			if err != nil {
 				panic(err)
 			}

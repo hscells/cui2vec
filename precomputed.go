@@ -39,9 +39,17 @@ func (v *PrecomputedEmbeddings) LoadModel(r io.Reader) error {
 	// i = matrix row; j = bytes position; k = matrix column.
 	for i, j, k := 0, 4, 0; i < size; i++ {
 		if k == 0 { // Start of new section
+			if j > len(b) {
+				k = 0
+				continue
+			}
 			idx = int(binary.LittleEndian.Uint32(b[j : j+4]))
 			matrix[idx] = make([]int, v.Cols)
 		} else {
+			if idx > len(matrix) || len(matrix[idx]) == 0 {
+				k = 0
+				continue
+			}
 			matrix[idx][k-1] = int(binary.LittleEndian.Uint32(b[j : j+4]))
 		}
 		k++
