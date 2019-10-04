@@ -27,6 +27,5 @@ func NewVecClient(addr string) (*VecClient, error) {
 func (c *VecClient) Vec(cui string) ([]float64, error) {
 	vec := new(VecResponse)
 	err := c.client.Call("EmbeddingsRPC.GetVector", cui, vec)
-	fmt.Println(vec)
 	return vec.V, err
 }
