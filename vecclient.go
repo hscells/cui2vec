@@ -1,7 +1,6 @@
 package cui2vec
 
 import (
-	"fmt"
 	"net/rpc"
 )
 
