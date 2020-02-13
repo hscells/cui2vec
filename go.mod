@@ -16,3 +16,5 @@ require (
 	gonum.org/v1/netlib v0.0.0-20180930160340-e150bd5bba73 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28
 )
+
+go 1.13
