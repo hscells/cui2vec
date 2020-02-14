@@ -17,7 +17,7 @@ type SimResponse struct {
 }
 
 func NewVecClient(addr string) (*VecClient, error) {
-	client, err := rpc.Dial("tcp", "localhost:8003")
+	client, err := rpc.Dial("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
