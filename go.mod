@@ -11,7 +11,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/testify v1.2.2 // indirect
 	golang.org/x/exp v0.0.0-20180907224206-e88728d35e99 // indirect
-	golang.org/x/sys v0.0.0-20190507160741-ecd444e8653b // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	gonum.org/v1/gonum v0.0.0-20181001095203-a290f01ec470
 	gonum.org/v1/netlib v0.0.0-20180930160340-e150bd5bba73 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28
